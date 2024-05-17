@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# OpenAI Slackbot with Node.js
 
-## Getting Started
+This is a Slackbot you can ask questions and get answers from OpenAI's GPT model.
 
-First, run the development server:
+### Environment Variables
+
+After completing the setup instructions below, you will have the following `.env` file in your project for testing locally, and the same environment variables added on Vercel:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+OPENAI_API_KEY=
+SLACK_BOT_TOKEN=
+SLACK_SIGNING_SECRET=
+SLACK_ADMIN_MEMBER_ID=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### OpenAI API Key
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Create a new key on [OpenAI API Keys](https://platform.openai.com/api-keys) and "Create new secret key", optionally naming the key.
+- Add the key to Vercel's environment variables as `OPENAI_API_KEY`.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+#### Slack Bot Token & Signing Secret
 
-## Learn More
+Go to [Slack API Apps Page](https://api.slack.com/apps):
 
-To learn more about Next.js, take a look at the following resources:
+- Create new App
+  - From Scratch
+  - Name your app & pick a workspace
+- Go to OAuth & Permissions
+  - Scroll to scopes
+  - Add the following scopes
+    - `app_mentions:read`
+    - `channels:history`
+    - `chat:write`
+    - `commands`
+  - Click "Install to Workplace"
+  - Copy **Bot User OAuth Token**
+  - Add the token to Vercel's environment variables as `SLACK_BOT_TOKEN`
+- Getting signing secret
+  - Basic Information --> App Credentials --> Copy **Signing Secret**
+  - Add the secret to Vercel's environment variables as `SLACK_SIGNING_SECRET`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Admin's Slack Member ID
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Click on your profile picture in Slack and click **Profile**.
+- Click on the three dots in the middle right corner and select **Copy member ID**.
+- Add the ID to Vercel's environment variables as `SLACK_ADMIN_MEMBER_ID`.
 
-## Deploy on Vercel
+### Enable Slack Events
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+After successfully deploying the app, go to [Slack API Apps Page](https://api.slack.com/apps) and select your app:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Go to **Event Subscriptions** and enable events.
+- Add the following URL to **Request URL**:
+  - `https://<your-vercel-app>.vercel.app/api/events`
+  - Make sure the URL is verified, otherwise check out [Vercel Logs](https://vercel.com/docs/observability/runtime-logs) for troubleshooting.
+  - Subscribe to bot events by adding:
+    - `app_mention`
+    - `channel_created`
+  - Click **Save Changes**.
+- Slack requires you to reinstall the app to apply the changes.
+
+## Local Development
+
+Use the [Vercel CLI](https://vercel.com/docs/cli) and [localtunnel](https://github.com/localtunnel/localtunnel) to test out this project locally:
+
+```sh
+pnpm i -g vercel
+pnpm vercel dev --listen 3000 --yes
+```
+
+```sh
+npx localtunnel --port 3000
+```
+
+Make sure to modify the [subscription URL](./README.md/#enable-slack-events) to the `localtunnel` URL.
